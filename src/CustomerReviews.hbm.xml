@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+ "-//Hibernate/Hibernate Mapping DTD//EN"
+ "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd"> 
+
+<hibernate-mapping>
+   <class name="pojo.CustomerReviews" table="CUSTOMER_REVIEWS">
+      <id name="reviewId" column="review_id" type="java.lang.Integer">
+         <generator class="native"/>
+      </id>
+      <property name="productId" column="product_id" type="java.lang.String"/>
+      <property name="reviewText" column="review_text" type="java.lang.String"/>
+      <property name="reviewTitle" column="review_title" type="java.lang.String"/>
+      <property name="ratingValue" column="rating_value" type="java.lang.Integer"/>
+      <property name="reviewCreationDate" column="review_creation_date" type="java.util.Date"/>
+      <property name="status" column="status" type="java.lang.String"/>
+      <property name="creationDate" column="creation_date" type="java.util.Date"/>
+      <property name="lastUpdated" column="last_updated" type="java.util.Date"/>
+   </class>
+</hibernate-mapping>
