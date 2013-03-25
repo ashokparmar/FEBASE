@@ -1,16 +1,18 @@
 package main;
 import helper.DBHelper;
+import helper.SentiWordNetHelper;
 import helper.WordNetHelper;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
+import pojo.CustomerReviewSentences;
 import pojo.CustomerReviews;
+import pojo.PosTaggedSentences;
 import pojo.ProductFeatures;
-import edu.stanford.nlp.dcoref.CorefChain;
-import edu.stanford.nlp.dcoref.CorefCoreAnnotations.CorefChainAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.NamedEntityTagAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.PartOfSpeechAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation;
@@ -18,23 +20,46 @@ import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
-import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
-import edu.stanford.nlp.trees.semgraph.SemanticGraph;
-import edu.stanford.nlp.trees.semgraph.SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation;
 import edu.stanford.nlp.util.CoreMap;
 
 public class FebaseController {
+	
+	public static final String NOUN_TAG = "NN";
+	public static final String ADJECTIVE_TAG = "JJ";
+	public static final String ADVERB_TAG = "RB";
+	public static final String VERB_TAG = "VB";
+	
 	public static void main(String[] args) throws Exception  {
-		DBHelper.init();
+		long start = Calendar.getInstance().getTimeInMillis();
+		System.out.println("Starting FebaseController ...");
 		//fetchSimilarWords("Sony-Xperia-Tipo");
-		//applyPOSTagging("Sony-Xperia-Tipo");
-		applyPOSTaggingUsingStanFordCoreNlp("Sony-Xperia-Tipo");
+		//storeCustomerReviewSentences("Sony-Xperia-Tipo");
+		//applyPOSTag("Sony-Xperia-Tipo");
+		//findRelatedFeatures("Sony-Xperia-Tipo");
+		
+		//fetchSimilarWords("sony-xperia-u");
+		//storeCustomerReviewSentences("sony-xperia-u");
+		//applyPOSTag("sony-xperia-u");
+		//findRelatedFeatures("sony-xperia-u");
+		
+		fetchSimilarWords("blackberry-curve-9220");
+		storeCustomerReviewSentences("blackberry-curve-9220");
+		applyPOSTag("blackberry-curve-9220");
+		findRelatedFeatures("blackberry-curve-9220");
+		System.out.println("FebaseController end ... done in " + ((Calendar.getInstance().getTimeInMillis() - start) / 1000) + " secs");
+		
+		
+
 	}
 	
 	public static void fetchSimilarWords(String productId) {
+		System.out.println("In fetchSimilarWords ....");
+		long dbStart = Calendar.getInstance().getTimeInMillis();
 		List<ProductFeatures> productFeatures = DBHelper.getProductFeatures(productId);
+		System.out.println("DB call completed in " + ((Calendar.getInstance().getTimeInMillis() - dbStart) / 1000) + " secs");
 		if (productFeatures != null && productFeatures.size() > 0) {
+			System.out.println("Total product features : " + productFeatures.size());
+			long wnStart = Calendar.getInstance().getTimeInMillis();
 			for (ProductFeatures record : productFeatures) {
 				String feature = record.getProductFeaturesPK().getFeatureName();
 				List<String> similarWordList = WordNetHelper.getSynonyms(feature);
@@ -50,82 +75,152 @@ public class FebaseController {
 					}
 				}
 			}
+			System.out.println("Completed similar word storing ... done in " + ((Calendar.getInstance().getTimeInMillis() - wnStart) / 1000) + " secs");
 		}
 	}
 	
-	public static void applyPOSTagging(String productId) {
+	public static void storeCustomerReviewSentences(String productId) {
+		System.out.println("In storeCustomerReviewSentences ....");
+		long dbStart = Calendar.getInstance().getTimeInMillis();
 		List<CustomerReviews> reviews = DBHelper.getCustomerReviews(productId);
+		System.out.println("DB call completed in " + ((Calendar.getInstance().getTimeInMillis() - dbStart) / 1000) + " secs");
 		if (reviews != null && reviews.size() > 0) {
-			for (CustomerReviews review : reviews) {
-				String reviewText = review.getReviewText();
-				if (reviewText != null) {
-					String[] sentences = reviewText.split(".");
-					System.out.println("Product Id : " + productId + ", Review Id : " + review.getReviewId());
-					for (String sentence : sentences) {
-						System.out.println(sentence);
-					}
-					System.out.println("End of review");
-				}
-			}
-		}
-	}
-	
-	public static void applyPOSTaggingUsingStanFordCoreNlp(String productId) {
-		List<CustomerReviews> reviews = DBHelper.getCustomerReviews(productId);
-		if (reviews != null && reviews.size() > 0) {
-			// creates a StanfordCoreNLP object, with POS tagging,
-			// lemmatization, NER, parsing, and coreference resolution
+			System.out.println("Total reviews : " + reviews.size());
 			Properties props = new Properties();
-			props.put("annotators",
-					"tokenize, ssplit, pos, lemma, ner, parse, dcoref");
+			props.put("annotators",	"tokenize, ssplit");
 			StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+			long wnStart = Calendar.getInstance().getTimeInMillis();
 			for (CustomerReviews review : reviews) {
 				String reviewText = review.getReviewText();
-				// create an empty Annotation
 				Annotation document = new Annotation(reviewText);
-				// run all Annotators on this text
 				pipeline.annotate(document);
-
-				// these are all the sentences in this document
-				// a CoreMap is essentially a Map that uses class objects as
-				// keys and has values with custom types
 				List<CoreMap> sentences = document.get(SentencesAnnotation.class);
-
 				for (CoreMap sentence : sentences) {
-					System.out.println("Sentence : " + sentence.toString());					
-					// traversing the words in the current sentence
-					// a CoreLabel is a CoreMap with additional token-specific
-					// methods
-					for (CoreLabel token : sentence.get(TokensAnnotation.class)) {
-						// this is the text of the token
-						String word = token.get(TextAnnotation.class);
-						System.out.println("Word : " + word + "#");
-						// this is the POS tag of the token
-						String pos = token.get(PartOfSpeechAnnotation.class);
-						System.out.println("POS Tag : " + pos + "#");
-						// this is the NER label of the token
-						String ne = token.get(NamedEntityTagAnnotation.class);
-						System.out.println("NamedEntity : " + ne);
-					}
-
-					// this is the parse tree of the current sentence
-					Tree tree = sentence.get(TreeAnnotation.class);
-					System.out.println("Tree : " + tree);
-					// this is the Stanford dependency graph of the current
-					// sentence
-					SemanticGraph dependencies = sentence
-							.get(CollapsedCCProcessedDependenciesAnnotation.class);
-					System.out.println("Dependencies : " + dependencies);
+					CustomerReviewSentences sentenceObj = new CustomerReviewSentences();
+					sentenceObj.setReviewId(review.getReviewId());
+					sentenceObj.setOriginalSentence(sentence.toString());
+					sentenceObj.setStatus("Active");
+					sentenceObj.setCreationDate(Calendar.getInstance().getTime());
+					sentenceObj.setLastUpdated(Calendar.getInstance().getTime());
+					DBHelper.saveCustomerReviewSentences(sentenceObj);
 				}
-				// This is the coreference link graph
-				// Each chain stores a set of mentions that link to each other,
-				// along with a method for getting the most representative
-				// mention
-				// Both sentence and token offsets start at 1!
-				Map<Integer, CorefChain> graph = document
-						.get(CorefChainAnnotation.class);
-				System.out.println("Graph : " + graph);
 			}
+			System.out.println("storeCustomerReviewSentences end ... done in " + ((Calendar.getInstance().getTimeInMillis() - wnStart) / 1000) + " secs");
 		}
 	}
+	
+	public static void applyPOSTag(String productId) {
+		System.out.println("In applyPOSTag ....");
+		long dbStart = Calendar.getInstance().getTimeInMillis();
+		List<CustomerReviewSentences> reviewSentences = DBHelper.getCustomerReviewSentences(productId);
+		System.out.println("DB call completed in " + ((Calendar.getInstance().getTimeInMillis() - dbStart) / 1000) + " secs");
+		if (reviewSentences != null && reviewSentences.size() > 0) {
+			System.out.println("Total review sentences : " + reviewSentences.size());
+			Properties props = new Properties();
+			props.put("annotators",	"tokenize, ssplit, pos");
+			StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+			long wnStart = Calendar.getInstance().getTimeInMillis();
+			ArrayList<PosTaggedSentences> posSentences = new ArrayList<PosTaggedSentences> ();
+			for (CustomerReviewSentences reviewSentence : reviewSentences) {
+				long loopStart = Calendar.getInstance().getTimeInMillis();
+				String reviewSentenceText = reviewSentence.getOriginalSentence();
+				Annotation document = new Annotation(reviewSentenceText);
+				pipeline.annotate(document);				
+				//List<CoreMap> annotatedSentence = document.get(SentencesAnnotation.class);
+				CoreMap sentence = document.get(SentencesAnnotation.class).get(0);	
+				StringBuilder posTaggedSentence = new StringBuilder();
+				
+				ArrayList<String> nounList = new ArrayList();
+				ArrayList<String> adjectiveList = new ArrayList();
+				ArrayList<String> adverbList = new ArrayList();
+				Double semanticScore = 0.0;
+				
+				for (CoreLabel token : sentence.get(TokensAnnotation.class)) {
+					// this is the text of the token
+					String word = token.get(TextAnnotation.class);
+					// this is the POS tag of the token
+					String pos = token.get(PartOfSpeechAnnotation.class);
+					posTaggedSentence.append(word+"#"+pos+" ");
+					if (pos.startsWith(NOUN_TAG) && !nounList.contains(word)) {
+						nounList.add(word);
+					} else if (pos.startsWith(ADJECTIVE_TAG) && !adjectiveList.contains(word)) {
+						adjectiveList.add(word);
+					} else if (pos.startsWith(ADVERB_TAG) && !adverbList.contains(word)) {
+						adverbList.add(word);
+					}
+					semanticScore += SentiWordNetHelper.getSemanticScore(word, pos);						
+				}
+				System.out.println("Pos tagging done for sentenceId " + reviewSentence.getSentenceId() + " in " + (Calendar.getInstance().getTimeInMillis() - loopStart) + " ms");
+				PosTaggedSentences posTagObj = new PosTaggedSentences();
+				posTagObj.setSentenceId(reviewSentence.getSentenceId());
+				posTagObj.setPosTaggedSentence(posTaggedSentence.toString());
+				posTagObj.setNouns(nounList.size() > 0 ? Arrays.toString(nounList.toArray()).replace("[", "").replace("]", "").replace(" ", "") : "");
+				posTagObj.setAdjectives(adjectiveList.size() > 0 ? Arrays.toString(adjectiveList.toArray()).replace("[", "").replace("]", "").replace(" ", "") : "");
+				posTagObj.setAdverbs(adverbList.size() > 0 ? Arrays.toString(adverbList.toArray()).replace("[", "").replace("]", "").replace(" ", "") : "");
+				posTagObj.setSemanticScore(semanticScore);
+				posTagObj.setStatus("Active");
+				posTagObj.setCreationDate(Calendar.getInstance().getTime());
+				posTagObj.setLastUpdated(Calendar.getInstance().getTime());
+				posSentences.add(posTagObj);
+				//long dbStore = Calendar.getInstance().getTimeInMillis();
+				//DBHelper.savePosTaggedSentences(posTagObj);
+				//System.out.println("Pos tagged sentece stored in db.. done in " + (Calendar.getInstance().getTimeInMillis() - dbStore) + " ms");
+			}
+			long dbStore = Calendar.getInstance().getTimeInMillis();
+			DBHelper.savePosTaggedSentencesList(posSentences);
+			System.out.println("Pos tagged sentece stored in db.. done in " + (Calendar.getInstance().getTimeInMillis() - dbStore) + " ms");
+			System.out.println("applyPOSTag end ... done in " + ((Calendar.getInstance().getTimeInMillis() - wnStart) / 1000) + " secs");
+		}
+	}
+	
+	public static void findRelatedFeatures(String productId) {
+		System.out.println("In findRelatedFeatures ....");
+		long dbStart = Calendar.getInstance().getTimeInMillis();
+		List<ProductFeatures> features = DBHelper.getProductFeatures(productId);
+		System.out.println("DB call for features completed in " + ((Calendar.getInstance().getTimeInMillis() - dbStart) / 1000) + " secs");
+		dbStart = Calendar.getInstance().getTimeInMillis();
+		List<PosTaggedSentences> posTagged = DBHelper.getPosTaggedSentences(productId);
+		System.out.println("DB call for review sentences completed in " + ((Calendar.getInstance().getTimeInMillis() - dbStart) / 1000) + " secs");
+		if (features != null && features.size() > 0 
+				&& posTagged != null && posTagged.size() > 0) {
+			try {
+				long wnStart = Calendar.getInstance().getTimeInMillis();
+				for (PosTaggedSentences taggedSentence : posTagged) {
+					String matchedFeature = null;
+					if (taggedSentence.getNouns() != null && !"".equals(taggedSentence.getNouns())) {
+						String[] nounList = taggedSentence.getNouns().split(",");
+						if (nounList.length > 0) {
+						nounLoop: for (String noun : nounList) {
+							for (ProductFeatures feature : features) {
+								if (noun.equalsIgnoreCase(feature.getProductFeaturesPK().getFeatureName())) {
+									matchedFeature = feature.getProductFeaturesPK().getFeatureName();
+									break nounLoop;
+								} else {
+									if (feature.getSimilarWords() != null && !"".equals(feature.getSimilarWords())) {
+										String[] similarWordList = feature.getSimilarWords().split("#");
+										if (similarWordList.length > 0) {
+											for (String similarWord : similarWordList) {
+												if (noun.equalsIgnoreCase(similarWord)) {
+													matchedFeature = feature.getProductFeaturesPK().getFeatureName();
+													break nounLoop;
+												}
+											}
+										}
+									}	
+								}
+							}
+							}
+						}	
+					}
+					if (matchedFeature != null && !"".equals(matchedFeature)) {
+						taggedSentence.setRelatedFeatureName(matchedFeature);
+						DBHelper.savePosTaggedSentences(taggedSentence);
+					}
+				}
+				System.out.println("findRelatedFeatures end ... done in " + ((Calendar.getInstance().getTimeInMillis() - wnStart) / 1000) + " secs");
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+		}
+	}	
 }

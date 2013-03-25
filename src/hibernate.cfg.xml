@@ -23,9 +23,10 @@
    </property>
 
    <!-- List of XML mapping files -->
-   <mapping resource="CustomerReviews.hbm.xml"/>
-   <mapping resource="PosTaggedSentences.hbm.xml"/>
-   <mapping resource="ProductFeatures.hbm.xml"/>
+   <mapping resource="CustomerReviews.hbm.xml" />
+   <mapping resource="CustomerReviewSentences.hbm.xml" />
+   <mapping resource="PosTaggedSentences.hbm.xml" />
+   <mapping resource="ProductFeatures.hbm.xml" />
 
 </session-factory>
 </hibernate-configuration>

@@ -9,7 +9,9 @@
          <generator class="native"/>
       </id>
       <property name="productId" column="product_id" type="java.lang.String"/>
-      <property name="reviewText" column="review_text" type="java.lang.String"/>
+      <property name="productTitle" column="product_title" type="java.lang.String" />
+      <property name="reviewerName" column="reviewer_name" type="java.lang.String" />
+	  <property name="reviewText" column="review_text" type="java.lang.String"/>
       <property name="reviewTitle" column="review_title" type="java.lang.String"/>
       <property name="ratingValue" column="rating_value" type="java.lang.Integer"/>
       <property name="reviewCreationDate" column="review_creation_date" type="java.util.Date"/>

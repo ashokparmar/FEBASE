@@ -2,7 +2,6 @@ package helper;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
 
 import edu.mit.jwi.Dictionary;
 import edu.mit.jwi.IDictionary;
@@ -14,7 +13,7 @@ import edu.mit.jwi.item.POS;
 
 public class WordNetHelper {
 
-	public static String WNHOME = "/home/ashok/Desktop/FeaturedBasedSentimentAnalysis" +
+	public static String WNHOME = "/runtime/FeaturedBasedSentimentAnalysis" +
 			"/dependency/wordnet/WordNet-3.0/dict";
 	public static void main(String[] args) {
 		try {
@@ -58,14 +57,16 @@ public class WordNetHelper {
 			
 			// look up first sense of the word
 			IIndexWord idxWord = dict.getIndexWord(wordStr, POS.NOUN);
-			IWordID wordID = idxWord.getWordIDs().get(0); // 1 st meaning
-			IWord word = dict.getWord(wordID);
-			ISynset synset = word.getSynset();
+			if (idxWord != null && idxWord.getWordIDs() != null && idxWord.getWordIDs().size() > 0) { 
+				IWordID wordID = idxWord.getWordIDs().get(0); // 1 st meaning
+				IWord word = dict.getWord(wordID);
+				ISynset synset = word.getSynset();
+				
+				// iterate over words associated with the synset
+				for(IWord w : synset.getWords())
+					synonyms.add(w.getLemma().replace("_", " "));
 			
-			// iterate over words associated with the synset
-			for(IWord w : synset.getWords())
-				synonyms.add(w.getLemma().replace("_", " "));
-			
+			}
 		} catch (IOException io) {
 			io.printStackTrace();
 			return null;

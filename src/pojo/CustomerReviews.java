@@ -6,6 +6,8 @@ import java.util.Date;
 public class CustomerReviews implements Serializable {
 	private Integer reviewId;
 	private String productId;
+	private String productTitle;
+	private String reviewerName;
 	private String reviewText;
 	private String reviewTitle;
 	private Integer ratingValue;
@@ -16,12 +18,14 @@ public class CustomerReviews implements Serializable {
 	
 	public CustomerReviews() {}
 	
-	public CustomerReviews(Integer reviewId, String productId, 
-			String reviewText, String reviewTitle, Integer ratingValue,
+	public CustomerReviews(Integer reviewId, String productId, String productTitle,
+			String reviewerName,  String reviewText, String reviewTitle, Integer ratingValue,
 			Date reviewCreationDate, String status, Date creationDate,
 			Date lastUpdated) {
 		this.reviewId = reviewId;
 		this.productId = productId;
+		this.productTitle = productTitle;
+		this.reviewerName = reviewerName;
 		this.reviewText = reviewText;
 		this.reviewTitle = reviewTitle;
 		this.ratingValue = ratingValue;
@@ -42,6 +46,12 @@ public class CustomerReviews implements Serializable {
 	}
 	public void setProductId(String productId) {
 		this.productId = productId;
+	}
+	public String getProductTitle() {
+		return productTitle;
+	}
+	public void setProductTitle(String productTitle) {
+		this.productTitle = productTitle;
 	}
 	public String getReviewText() {
 		return reviewText;
@@ -84,5 +94,13 @@ public class CustomerReviews implements Serializable {
 	}
 	public void setLastUpdated(Date lastUpdated) {
 		this.lastUpdated = lastUpdated;
+	}
+
+	public String getReviewerName() {
+		return reviewerName;
+	}
+
+	public void setReviewerName(String reviewerName) {
+		this.reviewerName = reviewerName;
 	}
 }

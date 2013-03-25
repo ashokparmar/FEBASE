@@ -5,18 +5,13 @@
 
 <hibernate-mapping>
    <class name="pojo.PosTaggedSentences" table="POS_TAGGED_SENTENCES">
-      <id name="taggedSentenceId" column="tagged_sentence_id" type="java.lang.Integer">
-         <generator class="native"/>
-      </id>
-      <property name="productId" column="product_id" type="java.lang.String"/>
-      <property name="reviewId" column="review_id" type="java.lang.Integer"/>
-      <property name="originalSentence" column="original_sentence" type="java.lang.String"/>
+      <id name="sentenceId" column="sentence_id" type="java.lang.Integer"></id>
       <property name="posTaggedSentence" column="pos_tagged_sentence" type="java.lang.String"/>
       <property name="nouns" column="nouns" type="java.lang.String"/>
       <property name="adjectives" column="adjectives" type="java.lang.String"/>
       <property name="adverbs" column="adverbs" type="java.lang.String"/>
       <property name="relatedFeatureName" column="related_feature_name" type="java.lang.String"/>
-      <property name="semanticScore" column="semantic_score" type="java.lang.Integer"/>
+      <property name="semanticScore" column="semantic_score" type="java.lang.Double"/>
       <property name="status" column="status" type="java.lang.String"/>
       <property name="creationDate" column="creation_date" type="java.util.Date"/>
       <property name="lastUpdated" column="last_updated" type="java.util.Date"/>

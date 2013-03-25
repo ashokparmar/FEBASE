@@ -6,7 +6,6 @@ import pojo.ProductFeaturesPK;
 public class ProductFeatures {
 	
 	private ProductFeaturesPK productFeaturesPK;
-	private String productTitle;
 	private String similarWords;
 	private Integer mentionedInReviews;
 	private Integer positiveInReviews;
@@ -24,7 +23,6 @@ public class ProductFeatures {
 			Integer negativeInReviews, Integer neutralInReviews,
 			String status, Date creationDate, Date lastUpdated) {
 		this.productFeaturesPK = productFeaturesPK;
-		this.productTitle = productTitle;
 		this.similarWords = similarWords;
 		this.mentionedInReviews = mentionedInReviews;
 		this.positiveInReviews = positiveInReviews;
@@ -35,12 +33,6 @@ public class ProductFeatures {
 		this.lastUpdated = lastUpdated;
 	}
 	
-	public String getProductTitle() {
-		return productTitle;
-	}
-	public void setProductTitle(String productTitle) {
-		this.productTitle = productTitle;
-	}
 	public String getSimilarWords() {
 		return similarWords;
 	}

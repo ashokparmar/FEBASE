@@ -3,31 +3,25 @@ package pojo;
 import java.util.Date;
 
 public class PosTaggedSentences {
-	private Integer taggedSentenceId;
-	private String productId;
-	private Integer reviewId;
-	private String originalSentence;
+	private Integer sentenceId;
 	private String posTaggedSentence;
 	private String nouns;
 	private String adjectives;
 	private String adverbs;
 	private String relatedFeatureName;
-	private Integer semanticScore;
+	private Double semanticScore;
 	private String status;
 	private Date creationDate;
 	private Date lastUpdated;
 	
 	public PosTaggedSentences () {}
 	
-	public PosTaggedSentences (Integer taggedSentenceId, String productId,
-			Integer reviewId, String originalSentence, String posTaggedSentence,
-			String nouns, String adjectives, String adverbs,
-			Integer semanticScore, String status, 
+	public PosTaggedSentences (Integer sentenceId, 
+			String posTaggedSentence, String nouns, 
+			String adjectives, String adverbs,
+			Double semanticScore, String status, 
 			Date creationDate, Date lastUpdated) {
-		this.taggedSentenceId = taggedSentenceId;
-		this.productId = productId;
-		this.reviewId = reviewId;
-		this.originalSentence = originalSentence;
+		this.sentenceId = sentenceId;
 		this.posTaggedSentence = posTaggedSentence;
 		this.nouns = nouns;
 		this.adjectives = adjectives;
@@ -38,29 +32,11 @@ public class PosTaggedSentences {
 		this.lastUpdated = lastUpdated;
 	}
 	
-	public Integer getTaggedSentenceId() {
-		return taggedSentenceId;
+	public Integer getSentenceId() {
+		return sentenceId;
 	}
-	public void setTaggedSentenceId(Integer taggedSentenceId) {
-		this.taggedSentenceId = taggedSentenceId;
-	}
-	public String getProductId() {
-		return productId;
-	}
-	public void setProductId(String productId) {
-		this.productId = productId;
-	}
-	public Integer getReviewId() {
-		return reviewId;
-	}
-	public void setReviewId(Integer reviewId) {
-		this.reviewId = reviewId;
-	}
-	public String getOriginalSentence() {
-		return originalSentence;
-	}
-	public void setOriginalSentence(String originalSentence) {
-		this.originalSentence = originalSentence;
+	public void setSentenceId(Integer sentenceId) {
+		this.sentenceId = sentenceId;
 	}
 	public String getPosTaggedSentence() {
 		return posTaggedSentence;
@@ -68,10 +44,10 @@ public class PosTaggedSentences {
 	public void setPosTaggedSentence(String posTaggedSentence) {
 		this.posTaggedSentence = posTaggedSentence;
 	}
-	public Integer getSemanticScore() {
+	public Double getSemanticScore() {
 		return semanticScore;
 	}
-	public void setSemanticScore(Integer semanticScore) {
+	public void setSemanticScore(Double semanticScore) {
 		this.semanticScore = semanticScore;
 	}
 	public String getStatus() {
